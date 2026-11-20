@@ -219,7 +219,10 @@ function calcDuration(module) {
         return hours * 60 + minutes;
     };
 
-    const diffMs = Math.abs(convertMinutes(module.props.end) - convertMinutes(module.props.start));
+    const start = module.type === 'duration' ? module.props.start : module.props.departure;
+    const end = module.type === 'duration' ? module.props.end : module.props.arrival;
+
+    const diffMs = Math.abs(convertMinutes(end) - convertMinutes(start));
 
     const hours = Math.floor(diffMs / 60);
     const minutes = Math.floor(diffMs % 60);
@@ -331,15 +334,20 @@ function renderModule(mod) {
             break;
 
         case 'transportation': {
+            mod.props.time = calcDuration(mod);
             return `
                 <div class="module-base${selectedModule(mod)}" data-type="transportation" data-label="移動" onclick="onclickModule('${mod.id}')" ${moduleStyle(mod)}>
                     <div class="transportation-module-main">
                         <div class="transportation-module-grid-item">
                             <div class="icon-in-module" style="--set-icon-bg: ${mod.props.color}">${ICON[mod.props.transitIcon]}</div>
                         </div>
-                        <div class="transportation-module-grid-item">${mod.props.transitText}</div>
-                        <div class="transportation-module-grid-item">${mod.props.from} → ${mod.props.to}</div>
-                        <div class="transportation-module-grid-item">${mod.props.service}・${mod.props.hour}時間${String(mod.props.minute).padStart(2, '0')}分</div>
+                        <div class="transportation-module-grid-item">${mod.props.service}</div>
+                        <div class="transportation-module-grid-item">${mod.props.from}</div>
+                        <div class="transportation-module-grid-item">→</div>
+                        <div class="transportation-module-grid-item">${mod.props.to}</div>
+                        <div class="transportation-module-grid-item">${mod.props.departure}</div>
+                        <div class="transportation-module-grid-item">${mod.props.arrival}</div>
+                        <div class="transportation-module-grid-item">${mod.props.time}</div>
                         <div class="transportation-module-grid-item">&yen;${mod.props.cost}</div>
                     </div>
                 </div>
@@ -521,27 +529,12 @@ function onchangeInputField(id, fieldKey, inputId, type) {
 }
 
 function onchangeTransportationIcon(id, inputId) {
-    const transitTextDict = {
-        walk: '徒歩',
-        bicycle: '自転車',
-        car: '車',
-        taxi: 'タクシー',
-        bus: 'バス',
-        train: '電車',
-        shinkansen: '新幹線',
-        plane: '飛行機',
-        ship: '船',
-    };
-
     const found = findModule(id);
     if (found === null) {
         return;
     }
 
-
-    const changedIcon = document.getElementById(inputId).value;
-    found.mod.props.transitIcon = changedIcon;
-    found.mod.props.transitText = transitTextDict[changedIcon];
+    found.mod.props.transitIcon = document.getElementById(inputId).value;
 
     renderViewerPane();
     saveHistory();
