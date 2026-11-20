@@ -144,7 +144,7 @@ function onclickModule(id) {
 }
 
 function moduleStyle(mod) {
-    return `style="--mod-line: ${mod.props.color}; --mod-selected-line: ${mod.props.selectedColor}"`
+    return `style="--mod-line: ${mod.props.color};"`
 }
 
 function calcTotalCost() {
@@ -247,7 +247,7 @@ function renderModule(mod) {
             return `
                 <div class="module-base${selectedModule(mod)}" data-type="header" data-label="ヘッダー" onclick="onclickModule('${mod.id}')" ${moduleStyle(mod)}>
                     <div class="header-module-main">
-                        <div class="header-module-item">${mod.props.title}</div>
+                        <div class="header-module-item" style="--header-title-size:${mod.props.title.size}">${mod.props.title.text}</div>
                         <div class="header-module-item">${convertDateFormat(mod.props.start)}～${convertDateFormat(mod.props.end)}</div>
                         <div class="header-module-item">&yen;${mod.props.cost}</div>
                     </div>
@@ -272,7 +272,7 @@ function renderModule(mod) {
                             </div>
                         </div>
                         <div class="schedule-heading-module-item">${convertDateFormat(mod.props.date)}</div>
-                        <div class="schedule-heading-module-item">${mod.props.title}</div>
+                        <div class="schedule-heading-module-item" style="--schedule-heading-title-size:${mod.props.title.size}">${mod.props.title.text}</div>
                         <div class="schedule-heading-module-item">&yen;${mod.props.cost}</div>
                     </div>
                 </div>
@@ -283,8 +283,8 @@ function renderModule(mod) {
         case 'heading': {
             return `
                 <div class="module-base${selectedModule(mod)}" data-type="heading" data-label="見出し" onclick="onclickModule('${mod.id}')" ${moduleStyle(mod)}>
-                    <div class="heading-module-main">${mod.props.main}</div>
-                    <div class="heading-module-sub">${mod.props.sub}</div>
+                    <div class="heading-module-main" style="--heading-main-size:${mod.props.main.size}">${mod.props.main.text}</div>
+                    <div class="heading-module-sub" style="--heading-sub-size:${mod.props.sub.size}">${mod.props.sub.text}</div>
                 </div>
             `;
         }
@@ -297,7 +297,7 @@ function renderModule(mod) {
                     <div class="duration-module-main">
                         <div class="duration-module-item">${mod.props.start} - ${mod.props.end}</div>
                         <div class="duration-module-item">${mod.props.duration}</div>
-                        <div class="duration-module-item">${mod.props.contents}</div>
+                        <div class="duration-module-item" style="--contents-size:${mod.props.contents.size}">${mod.props.contents.text}</div>
                     </div>
                 </div>
             `;
@@ -341,10 +341,10 @@ function renderModule(mod) {
                         <div class="transportation-module-grid-item">
                             <div class="icon-in-module" style="--set-icon-bg: ${mod.props.color}">${ICON[mod.props.transitIcon]}</div>
                         </div>
-                        <div class="transportation-module-grid-item">${mod.props.service}</div>
-                        <div class="transportation-module-grid-item">${mod.props.from}</div>
+                        <div class="transportation-module-grid-item" style="--service-size:${mod.props.service.size}">${mod.props.service.text}</div>
+                        <div class="transportation-module-grid-item" style="--from-size:${mod.props.from.size}">${mod.props.from.text}</div>
                         <div class="transportation-module-grid-item">→</div>
-                        <div class="transportation-module-grid-item">${mod.props.to}</div>
+                        <div class="transportation-module-grid-item" style="--to-size:${mod.props.to.size}">${mod.props.to.text}</div>
                         <div class="transportation-module-grid-item">${mod.props.departure}</div>
                         <div class="transportation-module-grid-item">${mod.props.arrival}</div>
                         <div class="transportation-module-grid-item">${mod.props.time}</div>
@@ -362,8 +362,8 @@ function renderModule(mod) {
                         <div class="spot-module-item">
                             <div class="icon-in-module" style="--set-icon-bg: ${mod.props.color}">${ICON.spot}</div>
                         </div>
-                        <div class="spot-module-item">${mod.props.name}</div>
-                        <div class="spot-module-item">${mod.props.address}</div>
+                        <div class="spot-module-item" style="--name-size:${mod.props.name.size}">${mod.props.name.text}</div>
+                        <div class="spot-module-item" style="--address-size:${mod.props.address.size}">${mod.props.address.text}</div>
                         <div class="spot-module-item">${mod.props.hour}時間${String(mod.props.minute).padStart(2, '0')}分</div>
                         <div class="spot-module-item">${mod.props.memo}</div>
                         <div class="spot-module-item">&yen;${mod.props.cost}</div>
@@ -579,16 +579,68 @@ function onclickColorPatch(id, prop, pacthcolor) {
     renderViewerPane();
 }
 
+function onclickFontSizeUpBtn(id, fieldKey) {
+    const found = findModule(id);
+    if (found === null) {
+        return;
+    }
+
+    const currentSize = found.mod.props[fieldKey].size.replace('px', '');
+    const newSize = parseInt(currentSize) + 1;
+
+    found.mod.props[fieldKey].size = newSize + 'px';
+
+    renderViewerPane();
+    renderSettingsPane();
+    saveHistory();
+}
+
+function onclickFontSizeDownBtn(id, fieldKey) {
+    const found = findModule(id);
+    if (found === null) {
+        return;
+    }
+
+    const currentSize = found.mod.props[fieldKey].size.replace('px', '');
+    const newSize = parseInt(currentSize) - 1;
+
+    found.mod.props[fieldKey].size = newSize + 'px';
+
+    renderViewerPane();
+    renderSettingsPane();
+    saveHistory();
+}
+
 function renderSettingsInput(module, field) {
     const fieldId = 'f_' + module.mod.id + '_' + field.key;
     switch (field.type) {
         case 'text':
+            return `
+                <div class="module-field-item input-text-field-outer">
+                    <div class="module-field-label input-text-field-item">${field.label}</div>
+                    <input id="${fieldId}" class="input-text-field-item" type="${field.type}" value="${module.mod.props[field.key].text}" onchange="onchangeInputField('${module.mod.id}', '${field.key}', '${fieldId}', '${field.type}')">
+                    <div class="input-text-field-item">${module.mod.props[field.key].size.replace('px', '')}<span>px</span></div>
+                    <div class="input-text-field-item">
+                        <button onclick="onclickFontSizeUpBtn('${module.mod.id}', '${field.key}')">${ICON.fontUp}</button>
+                        <button onclick="onclickFontSizeDownBtn('${module.mod.id}', '${field.key}')">${ICON.fontDown}</button>
+                    </div>
+                </div>
+            `;
+            break;
         case 'date':
+            return `
+                <div class="module-field-item">
+                    <div class="module-field-label">${field.label}</div>
+                    <input id="${fieldId}" type="${field.type}" value="${module.mod.props[field.key]}" onchange="onchangeInputField('${module.mod.id}', '${field.key}', '${fieldId}', '${field.type}')">
+                </div>
+            `;
+            break;
+
         case 'time':
             return `
                 <div class="module-field-item">
-                <div class="module-field-label">${field.label}</div>
-                    <input id="${fieldId}" type="${field.type}" value="${module.mod.props[field.key]}" ${field.type === 'number' ? 'min="0"' : ''} onchange="onchangeInputField('${module.mod.id}', '${field.key}', '${fieldId}', '${field.type}')">
+                    <div class="module-field-label">${field.label}</div>
+                    <input id="${fieldId}"  type="${field.type}" value="${module.mod.props[field.key]}" onchange="onchangeInputField('${module.mod.id}', '${field.key}', '${fieldId}', '${field.type}')">
                 </div>
             `;
             break;
