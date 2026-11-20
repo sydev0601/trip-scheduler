@@ -519,7 +519,7 @@ function onchangeInputField(id, fieldKey, inputId, type) {
     } else if (type === 'text') {
         const inputstr = document.getElementById(inputId).value;
         const replacedStr = inputstr.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;').replace("'", '&#39;');
-        found.mod.props[fieldKey] = replacedStr;
+        found.mod.props[fieldKey].text = replacedStr;
     } else {
         found.mod.props[fieldKey] = document.getElementById(inputId).value;
     }
