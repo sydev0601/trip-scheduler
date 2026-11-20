@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet" crossorigin="anonymous">
+    <title>Trip Scheduler</title>
+</head>
+
+<body>
+    <div id="workSpace">
+        <!-- Module Pane -->
+        <div class="pane left-pane">
+            <h3 class="pane-heading">Module</h3>
+            <div id="module-pane"></div>
+        </div>
+
+        <!-- Viewer Pane -->
+        <div id="centerPane" class="pane center-pane">
+            <div id="mods" class="viewer-grid"></div>
+        </div>
+
+        <!-- Setting Pane -->
+        <div class="pane right-pane">
+            <h3 class="pane-heading">Settings</h3>
+            <div id="settingsPane" class="settings-grid"></div>
+        </div>
+    </div>
+
+    <div id="bottomBar" class="bottom-bar"></div>
+
+    <script src="icon.js"></script>
+    <script src="module.js"></script>
+    <script src="state.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

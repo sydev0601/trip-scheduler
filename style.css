@@ -1,0 +1,982 @@
+:root {
+    --side-bg: #ffffff;
+    --center-bg: #F6F6F6;
+    --line: #bababa;
+    --hovered-line: #909090;
+    --ink: #777777;
+    --icon: #ffffff;
+    --icon-bg: #aaaaaa;
+    --selected-line: #444444;
+    --selected-ink: #ffffff;
+    --dot: #bababa;
+    --mod-bg: #ffffff;
+    --btn-ink: #ffffff;
+    --btn-bg: #a3a3a3;
+    --hovered-btn-bg: #dedede;
+    --transportation-icon-bg: #ffffff;
+    --transportation-icon-bg-selected: #aaaaaa;
+    --transportation-icon-line: #aaaaaa;
+    --transportation-icon-line-selected: #ffffff;
+}
+
+* {
+    font-family: "Noto Sans JP", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-style: normal;
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+    margin: 0;
+}
+
+#workSpace {
+    display: grid;
+    grid-template-columns: minmax(200px, 300px) minmax(300px, 1fr) minmax(200px, 300px);
+    height: 100vh;
+
+}
+
+.pane {
+    overflow: auto;
+    min-height: 0;
+    padding: 8px;
+    color: var(--ink);
+}
+
+.right-pane {
+    background: var(--side-bg);
+    border-left: solid 1px var(--line);
+}
+
+.pane-heading {
+    margin-bottom: 8px;
+}
+
+/* ======================= */
+/* ===== Module Pane ===== */
+/* ======================= */
+.left-pane {
+    background: var(--side-bg);
+    border-right: solid 1px var(--line);
+}
+
+.module-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: minmax(auto, auto);
+    margin-top: 8px;
+    gap: 8px;
+}
+
+.module-subhead {
+    display: flex;
+    align-items: center;
+    margin: 8px 8px 8px 0;
+}
+
+.module-subhead:after,
+.module-subhead:before {
+    display: block;
+    content: "";
+    height: 1px;
+
+    margin-top: 2px;
+
+    background-color: var(--line);
+}
+
+.module-subhead:before {
+    width: 1rem;
+    flex-shrink: 0;
+    margin-right: 0.5rem;
+}
+
+.module-subhead:after {
+    flex-grow: 1;
+    margin-left: 0.5rem;
+}
+
+.module {
+    border: solid 1px var(--line);
+    border-radius: 12px;
+    padding: 8px;
+
+    cursor: pointer;
+}
+
+.module:hover {
+    border: solid 1px var(--hovered-line);
+    box-shadow: inset 0 0 0 1px var(--hovered-line);
+}
+
+.icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 28px;
+    height: 28px;
+    padding: 4px;
+
+    border-radius: 8px;
+
+    background: var(--icon-bg);
+}
+
+.icon>svg {
+    width: 20px;
+    height: 20px;
+    color: var(--icon);
+}
+
+.module>h5 {
+    margin-top: 4px;
+}
+
+/* ======================= */
+/* ===== Viewer Pane ===== */
+/* ======================= */
+.center-pane {
+    display: grid;
+    justify-content: center;
+    align-content: start;
+    background: var(--center-bg);
+}
+
+#mods {
+    background-color: var(--center-bg);
+}
+
+.viewer-grid {
+    --col1: 70px;
+    --col2: 36px;
+    --col3-pad: 8px;
+
+    display: grid;
+    grid-template-columns: var(--col1) var(--col2) minmax(100px, 500px);
+    position: relative;
+}
+
+.viewer-grid::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(var(--col1) + var(--col2));
+    right: 0;
+    background: var(--mod-bg);
+    border: solid 1px var(--line);
+    border-radius: 12px;
+    z-index: 0;
+}
+
+.viewer-grid::after {
+    content: "";
+    position: absolute;
+
+    width: 4px;
+    top: 0;
+    bottom: 0;
+    left: calc(var(--col1) + (var(--col2) / 2) - 2px);
+    right: 0;
+
+    background: var(--line);
+    border-radius: 2px;
+}
+
+.viewer-row {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    position: relative;
+    z-index: 1;
+}
+
+.viewer-row>.module-base {
+    grid-row: 1;
+}
+
+.viewer-row.drop-target {
+    outline: 2px dashed var(--selected-line);
+    outline-offset: -2px;
+    border-radius: 12px;
+}
+
+/* モジュール共通 */
+.module-base {
+    --pad-h: 16px;
+    --pad-v: 8px;
+    --label-bg: var(--mod-bg);
+
+    display: grid;
+    align-items: center;
+
+    position: relative;
+
+    padding: var(--pad-v) var(--pad-h) var(--pad-v) var(--pad-h);
+
+    border: solid 1px var(--mod-line, var(--line));
+    border-radius: 12px;
+    color: var(--ink);
+
+    cursor: pointer;
+}
+
+/* 選択中のモジュール */
+.mod-selected.module-base,
+.module-base:hover {
+    box-shadow: inset 0 0 0 1px var(--mod-line, var(--selected-line));
+}
+
+/* 選択中のモジュールの見出し data-labelがあるときだけ表示*/
+.mod-selected.module-base[data-label]::before,
+.module-base:hover::before {
+    content: attr(data-label);
+    position: absolute;
+
+    top: -6px;
+    left: 17px;
+    padding: 1px 8px 2px 8px;
+    line-height: 1;
+
+    background: var(--mod-line, var(--icon-bg));
+    color: #ffffff;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+/* ===== モジュールごとの違い(配置・背景・padding) ===== */
+/* 1列目 */
+.module-base[data-type="time"] {
+    grid-column: 1;
+    --label-bg: var(--center-bg);
+}
+
+/* 2列目 */
+.module-base[data-type="dot"] {
+    grid-column: 2;
+}
+
+/* 3列目 */
+.module-base[data-type="header"],
+.module-base[data-type="heading"],
+.module-base[data-type="duration"],
+.module-base[data-type="line"],
+.module-base[data-type="transportation"],
+.module-base[data-type="schedule-heading"],
+.module-base[data-type="spot"] {
+    grid-column: 3;
+    margin-inline: var(--col3-pad);
+    margin-block: var(--col3-pad);
+}
+
+/* padding狭め */
+.module-base[data-type="time"],
+.module-base[data-type="dot"],
+.module-base[data-type="line"] {
+    --pad-h: 6px;
+    border: none;
+}
+
+/* padding狭め:選択中 */
+.mod-selected.module-base[data-type="time"],
+.mod-selected.module-base[data-type="dot"],
+.mod-selected.module-base[data-type="line"] {
+    box-shadow: inset 0 0 0 1px var(--mod-line, var(--selected-line));
+}
+
+.mod-selected.module-base[data-label="ドット"]::before,
+.module-base[data-label="ドット"]:hover::before {
+    top: -4px;
+    left: 4px;
+    padding: 1px 2px 2px 2px;
+    font-size: 8px;
+}
+
+/* ===== 各モジュールの中身 ===== */
+/* === ヘッダー === */
+.header-module-main {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2px;
+}
+
+.header-module-item:nth-child(1) {
+    grid-row: 1 / 2;
+    font-size: 24px;
+}
+
+.header-module-item:nth-child(2) {
+    grid-row: 2 / 3;
+    font-size: 16px;
+}
+
+.header-module-item:nth-child(3) {
+    grid-row: 3 / 4;
+    font-size: 16px;
+    justify-self: end;
+}
+
+/* === 日程見出し === */
+.schedule-heading-module-main {
+    display: grid;
+    grid-template-columns: 50px 1fr 100px;
+    gap: 2px;
+}
+
+.schedule-heading-module-item:nth-child(1) {
+    grid-column: 1 / 2;
+    grid-row: 1 / 3;
+    justify-self: start;
+    align-self: center;
+}
+
+.schedule-heading-day {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    width: 40px;
+    height: 50px;
+    border-radius: 6px;
+    background-color: var(--day-color, var(--icon-bg));
+    color: var(--icon);
+}
+
+.schedule-heading-d {
+    font-size: 12px;
+    line-height: 1;
+}
+
+.schedule-heading-num {
+    font-size: 24px;
+    line-height: 1;
+}
+
+.schedule-heading-module-item:nth-child(2) {
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
+    font-size: 16px;
+}
+
+.schedule-heading-module-item:nth-child(3) {
+    grid-column: 2 / 3;
+    grid-row: 2 / 3;
+    font-size: 24px;
+}
+
+.schedule-heading-module-item:nth-child(4) {
+    grid-column: 3 / 4;
+    grid-row: 1 / 3;
+    justify-self: end;
+    align-self: end;
+    font-size: 14px;
+}
+
+/* === 見出し === */
+.heading-module-main {
+    font-size: 26px;
+}
+
+.heading-module-sub {
+    font-size: 16px;
+}
+
+/* === 所要時間 === */
+.duration-module-main {
+    display: grid;
+    grid-template-columns: 1fr 1fr 2fr;
+    gap: 2px;
+}
+
+.duration-module-item:nth-child(1) {
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+    align-self: center;
+    justify-self: start;
+    font-size: 18px;
+}
+
+.duration-module-item:nth-child(2) {
+    align-self: center;
+    justify-self: center;
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
+    font-size: 14px;
+}
+
+.duration-module-item:nth-child(3) {
+    align-self: center;
+    justify-self: start;
+    grid-column: 3 / 4;
+    grid-row: 1 / 2;
+    font-size: 14px;
+}
+
+/* === 時刻 === */
+.time-module-main {
+    text-align: center;
+    font-size: 20px;
+    color: var(--ink-color, var(--ink));
+}
+
+/* === ドット === */
+.dot-module-main {
+    display: grid;
+    justify-self: center;
+    align-self: center;
+    border: solid 10px var(--dot-color, var(--dot));
+    border-radius: 50%;
+}
+
+/* === 区切り線 === */
+.line-module-main {
+    display: grid;
+    place-items: center;
+    height: 10px;
+}
+
+.h-line {
+    border: none;
+    border-top: 2px solid var(--hr-color, var(--line));
+    width: 100%;
+    margin: 0;
+}
+
+/* === 移動 === */
+.transportation-module-main {
+    display: grid;
+    grid-template-columns: 50px 1fr 100px;
+    gap: 2px;
+}
+
+.transportation-module-grid-item:nth-child(1) {
+    grid-column: 1 / 2;
+    grid-row: 1 / 4;
+    align-self: center;
+    justify-self: start;
+}
+
+.icon-in-module {
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    width: 36px;
+    height: 36px;
+    background-color: var(--set-icon-bg, var(--icon-bg));
+    border-radius: 6px;
+    color: var(--icon);
+}
+
+.icon-in-module>svg {
+    width: 28px;
+    height: 28px;
+}
+
+.transportation-module-grid-item:nth-child(2) {
+    grid-column: 2 / 4;
+    grid-row: 1 / 2;
+    font-size: 12px;
+}
+
+
+.transportation-module-grid-item:nth-child(3) {
+    grid-column: 2 / 4;
+    grid-row: 2 / 3;
+    font-size: 24px;
+}
+
+.transportation-module-grid-item:nth-child(4) {
+    grid-column: 2 / 3;
+    grid-row: 3 / 4;
+    font-size: 14px;
+}
+
+.transportation-module-grid-item:nth-child(5) {
+    grid-column: 3 / 4;
+    grid-row: 3 / 4;
+    justify-self: end;
+    font-size: 14px;
+}
+
+
+/* === スポット === */
+.spot-module-main {
+    display: grid;
+    grid-template-columns: 50px 1fr 100px;
+    gap: 2px;
+}
+
+.spot-module-item:nth-child(1) {
+    grid-column: 1 / 2;
+    grid-row: 1 / 4;
+    padding-top: 6px;
+}
+
+.spot-module-item:nth-child(2) {
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
+    font-size: 24px;
+}
+
+.spot-module-item:nth-child(3) {
+    grid-column: 2 / 3;
+    grid-row: 2 / 3;
+    font-size: 14px;
+}
+
+.spot-module-item:nth-child(4) {
+    grid-column: 3 / 4;
+    grid-row: 2 / 3;
+    font-size: 14px;
+    justify-self: end;
+}
+
+.spot-module-item:nth-child(5) {
+    grid-column: 2 / 3;
+    grid-row: 3 / 4;
+    font-size: 14px;
+}
+
+.spot-module-item:nth-child(6) {
+    grid-column: 3 / 4;
+    grid-row: 1 / 4;
+    justify-self: end;
+    align-self: end;
+    font-size: 14px;
+}
+
+/* ======================== */
+/* ===== Setting Pane ===== */
+/* ======================== */
+.settings-grid {
+    display: grid;
+    gap: 12px;
+}
+
+.unselected {
+    font-size: 14px;
+}
+
+/* === モジュールのアイコン，名前，説明 === */
+.module-info-grid {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 8px;
+
+    border-bottom: solid 1px var(--line);
+}
+
+.module-info-item:nth-child(1) {
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+
+    background-color: var(--icon-bg);
+}
+
+.module-info-item:nth-child(2) {
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
+
+    align-self: center;
+
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.module-info-item:nth-child(3) {
+    grid-column: 1 / 3;
+    grid-row: 2 / 3;
+    height: 50px;
+    padding-bottom: 8px;
+    font-size: 14px;
+}
+
+.module-info-item>svg {
+    width: 30px;
+
+    justify-self: center;
+    align-self: center;
+
+    color: var(--btn-ink);
+}
+
+/* === 上下移動，複製，削除ボタン === */
+.module-edit-buttons-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.module-edit-buttons-item {
+    width: 100%;
+    height: 30px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: var(--btn-bg);
+    box-shadow: none;
+    border: none;
+    outline: none;
+    border-radius: 4px;
+    padding: 0;
+
+    cursor: pointer;
+}
+
+.module-edit-buttons-item:hover {
+    background: var(--hovered-btn-bg);
+}
+
+.module-edit-buttons-item>svg {
+    color: var(--btn-ink);
+}
+
+.module-edit-buttons-item:nth-child(1)>svg,
+.module-edit-buttons-item:nth-child(2)>svg {
+    height: 30px;
+}
+
+.module-edit-buttons-item:nth-child(3)>svg,
+.module-edit-buttons-item:nth-child(4)>svg {
+    height: 20px;
+}
+
+.module-field-grid {
+    display: grid;
+    gap: 12px;
+}
+
+.module-field-item>input[type="text"],
+.module-field-item>input[type="date"],
+.module-field-item>input[type="time"],
+.module-field-item>input[type="number"] {
+    width: 270px;
+    height: 40px;
+    border: solid 2px var(--line);
+    border-radius: 4px;
+}
+
+.module-field-label {
+    font-size: 12px;
+    margin-bottom: 2px;
+}
+
+.transportation_radio_grid {
+    display: grid;
+    grid-template-columns: repeat(5, 50px);
+    grid-template-rows: repeat(2, 50px);
+    justify-items: center;
+    align-items: center;
+}
+
+.transportation_radio_label {
+    display: flex;
+    cursor: pointer;
+}
+
+.transportation_radio_label input[type="radio"] {
+    display: none;
+}
+
+.transportation_radio_icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 42px;
+    height: 42px;
+    border: solid 1px var(--transportation-icon-line);
+    border-radius: 6px;
+    background-color: var(--transportation-icon-bg);
+    color: var(--transportation-icon-line);
+}
+
+.transportation_radio_icon>svg {
+    width: 36px;
+    height: 36px;
+}
+
+.transportation_radio_label input[type="radio"]:checked+.transportation_radio_icon {
+    background-color: var(--transportation-icon-bg-selected);
+    color: var(--transportation-icon-line-selected);
+}
+
+.input-cost-outer {
+    display: grid;
+    grid-template-columns: 85% 15%;
+}
+
+.input-cost {
+    height: 40px;
+    border: solid 2px var(--line);
+    border-radius: 4px;
+}
+
+.textarea>label {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.textarea>textarea {
+    max-width: 270px;
+    width: 270px;
+    resize: both;
+}
+
+/* color picker */
+.color-field {
+    position: relative;
+}
+
+.select-color-outer {
+    display: flex;
+}
+
+.pallet-pull-down-btn {
+    display: grid;
+    justify-content: center;
+    align-items: center;
+
+    width: 30px;
+    height: 30px;
+
+    margin-right: 4px;
+
+    border: none;
+    border-radius: 8px;
+    background-color: var(--btn-bg);
+}
+
+.pallet-pull-down-btn:hover {
+    background-color: var(--hovered-btn-bg);
+}
+
+.pallet-pull-down-btn>svg {
+    width: 24px;
+    height: 24px;
+    color: var(--btn-ink);
+    transition: transform 0.2s ease;
+}
+
+.select-color-outer:has(.pull-down-pallets.open) .pallet-pull-down-btn>svg {
+    transform: rotate(90deg);
+}
+
+.pallet,
+.pallet-btn {
+    display: grid;
+    grid-template-columns: repeat(7, 30px);
+    grid-template-rows: 30px;
+    gap: 2px;
+    justify-content: center;
+    align-content: center;
+}
+
+.color-patch-btn,
+.color-patch {
+    background-color: var(--patch-color);
+    border: none;
+    border-radius: 4px;
+}
+
+.color-patch-btn.selected,
+.pallet-btn.selected {
+    border: solid 2px var(--selected-line);
+}
+
+.color-patch-btn:hover,
+.pallet-btn:hover {
+    border: solid 2px var(--hovered-line);
+}
+
+.color-patch-btn:active,
+.pallet-btn:active {
+    scale: 0.95;
+}
+
+.pallet-btn {
+    padding: 2px;
+    border-radius: 6px;
+}
+
+.pull-down-pallets {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(7, 1fr);
+
+    position: absolute;
+
+    width: fit-content;
+
+    gap: 1px;
+    top: 100%;
+    left: 26px;
+    margin-top: 4px;
+    padding: 2px;
+
+    border: solid 2px var(--line);
+    border-radius: 8px;
+
+    background-color: var(--side-bg);
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+    transform: translateY(-8px) scaleY(0.9);
+    transform-origin: top;
+    transition:
+        opacity 0.15s ease-in,
+        transform 0.15s ease-in,
+        visibility 0s linear 0.15s;
+}
+
+.pull-down-pallets.open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+
+    transform: none;
+    transform-origin: top;
+    transition:
+        opacity 0.2s ease-out,
+        transform 0.2s ease-out,
+        visibility 0s linear 0s;
+}
+
+.hm-outer {
+    display: grid;
+    grid-template-columns: 35% 15% 35% 15%;
+    max-width: 280px;
+}
+
+.hm-input {
+    height: 40px;
+    border: solid 2px var(--line);
+    border-radius: 4px;
+}
+
+.unit-label {
+    align-self: flex-end;
+    margin-left: 2px;
+    font-size: 12px;
+}
+
+.module[draggable="true"] {
+    cursor: grab;
+}
+
+.viewer-row.dragging {
+    opacity: 0.4;
+}
+
+.module-base.drop-before::after,
+.module-base.drop-after::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--selected-line);
+    pointer-events: none;
+}
+
+.module-base.drop-before::after {
+    top: -10px;
+}
+
+.module-base.drop-after::after {
+    bottom: -10px;
+}
+
+.bottom-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 60px);
+    grid-template-rows: 50px;
+
+    justify-items: center;
+    align-items: center;
+
+    position: fixed;
+
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0 16px;
+
+    border: solid 1px var(--line);
+    border-radius: 25px;
+    background-color: var(--side-bg);
+
+    z-index: 100;
+}
+
+.bottom-bar>button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 36px;
+    height: 36px;
+    padding: 0;
+
+    background-color: var(--side-bg);
+    border: none;
+}
+
+.bottom-bar>button:hover:not(:disabled) {
+    background-color: var(--hovered-btn-bg);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.bottom-bar>button:active {
+    background-color: var(--hovered-btn-bg);
+    border-radius: 6px;
+    scale: 0.9;
+}
+
+.bottom-bar>button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.bottom-bar>button>svg {
+    width: 30px;
+    height: 30px;
+    color: var(--btn-bg);
+}
+
+.exporting .module-base.mod-selected,
+.exporting .module-base:hover {
+    box-shadow: none !important;
+}
+
+.exporting .module-base.mod-selected::before,
+.exporting .module-base:hover::before {
+    display: none !important;
+}
